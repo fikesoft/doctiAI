@@ -1,26 +1,21 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@plugin "daisyui";
+@plugin "daisyui" {
+  themes: 'caramellatte' ,'valentine';
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@layer utilities {
+  .text-h1 { @apply text-4xl leading-tight tracking-[-0.02em] font-bold; }
+  .text-h2 { @apply text-3xl leading-snug tracking-[-0.02em]; }
+  .text-h3 { @apply text-2xl leading-normal; }
+  .text-h4 { @apply text-xl leading-relaxed; }
+  .text-h5 { @apply text-lg leading-relaxed; }
+  .text-h6 { @apply text-base leading-relaxed; }
+
+  .text-p    { @apply text-base leading-loose; }
+  .text-p-sm { @apply text-sm leading-snug text-gray-600; }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+section{
+  padding:80px 0px ;
 }
