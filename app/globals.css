@@ -11,7 +11,6 @@
   .text-h4 { @apply text-xl leading-relaxed; }
   .text-h5 { @apply text-lg leading-relaxed; }
   .text-h6 { @apply text-base leading-relaxed; }
-
   .text-p    { @apply text-base leading-loose; }
   .text-p-sm { @apply text-sm leading-snug text-gray-600; }
 }

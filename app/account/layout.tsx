@@ -1,17 +1,20 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import Nav_Account from "../(components)/Nav/Nav_Account";
+import { RequireAuth } from "../(components)/RequireAuth/RequireAuth";
+import { AccountNav } from "../(components)/Nav/Nav_Account";
 
-const layout = ({ children }: { children: ReactNode }) => {
+const LayoutAccount = ({ children }: { children: ReactNode }) => {
   return (
-    <section>
-      <div className="flex gap-6">
-        <Nav_Account />
-        {children}
-      </div>
-    </section>
+    <RequireAuth>
+      <section>
+        <div className="flex gap-6 items-center">
+          <AccountNav />
+          {children}
+        </div>
+      </section>
+    </RequireAuth>
   );
 };
 
-export default layout;
+export default LayoutAccount;
