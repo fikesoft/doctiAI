@@ -1,10 +1,27 @@
 "use client";
 
 import { useTokenConverter } from "@/app/(hooks)/useTokenConverter";
-
+import useAppDispatch from "@/store/hooks/useDispatch";
+import { pushToast } from "@/store/slices/toast";
+import { useRouter } from "next/navigation";
 export function SolanaDeposit() {
   const { rawUsd, tokens, onChange } = useTokenConverter("usd");
-
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const handleDeposit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const rawUsdFloat = parseFloat(rawUsd);
+    if (!rawUsd || isNaN(rawUsdFloat) || rawUsdFloat <= 0) {
+      dispatch(
+        pushToast({
+          messageToast: "Please insert an amount greater than 0",
+          headerToast: "error",
+        })
+      );
+      return;
+    }
+    router.push("/crypto");
+  };
   return (
     <div className="card mx-auto max-w-xl shadow-lg bg-base-100 h-auto ">
       <div className="card-body space-y-6">
@@ -34,8 +51,8 @@ export function SolanaDeposit() {
         {/* Deposit button (you wire up logic) */}
         <button
           className="btn btn-primary w-full"
-          onClick={() => {
-            /* your Solana deposit flow here */
+          onClick={(e) => {
+            handleDeposit(e);
           }}
         >
           Deposit with Solana
