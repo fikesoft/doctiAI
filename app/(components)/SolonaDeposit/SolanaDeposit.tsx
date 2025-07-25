@@ -8,7 +8,7 @@ export function SolanaDeposit() {
   const { rawUsd, tokens, onChange } = useTokenConverter("usd");
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const handleDeposit = (e: React.MouseEvent) => {
+  const handleSubmitDeposit = (e: React.MouseEvent) => {
     e.preventDefault();
     const rawUsdFloat = parseFloat(rawUsd);
     if (!rawUsd || isNaN(rawUsdFloat) || rawUsdFloat <= 0) {
@@ -20,7 +20,7 @@ export function SolanaDeposit() {
       );
       return;
     }
-    router.push("/crypto");
+    router.push(`/crypto?usd=${rawUsdFloat}`);
   };
   return (
     <div className="card mx-auto max-w-xl shadow-lg bg-base-100 h-auto ">
@@ -52,7 +52,7 @@ export function SolanaDeposit() {
         <button
           className="btn btn-primary w-full"
           onClick={(e) => {
-            handleDeposit(e);
+            handleSubmitDeposit(e);
           }}
         >
           Deposit with Solana
