@@ -17,7 +17,7 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String?
-  picture   String?  @map("image")
+  image     String?  @map("image")
   role      UserRole @default(user)
   balance   Decimal  @default(0.0)
   createdAt DateTime @default(now())
