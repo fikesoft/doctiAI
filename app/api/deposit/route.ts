@@ -3,10 +3,11 @@ import { PublicKey } from "@solana/web3.js";
 import { NextRequest, NextResponse } from "next/server";
 import { convertUsdToSol } from "@/lib/solana/convertUsdToSol";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../api/auth/[...nextauth]/route";
+
 import BigNumber from "bignumber.js";
 import { createUserWallet } from "@/lib/solana/createUserWallet";
 import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/nextauth";
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
