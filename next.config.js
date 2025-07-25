@@ -5,7 +5,13 @@ const nextConfig = {
 
     // Disable automatic trailing slashes on routes
     trailingSlash: false,
-
+    webpack(config) {
+        config.experiments = {
+            ...(config.experiments || {}),
+            asyncWebAssembly: true,
+        };
+        return config;
+    },
 }
 
 module.exports = nextConfig

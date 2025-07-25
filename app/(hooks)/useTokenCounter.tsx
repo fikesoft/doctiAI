@@ -1,20 +1,30 @@
-import { encoding_for_model, type TiktokenModel } from "@dqbd/tiktoken";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import { type TiktokenModel } from "tiktoken";
 
-export function useTokenCount(
+export function useTokenCounter(
   text: string,
   model: TiktokenModel = "gpt-3.5-turbo"
 ) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    try {
-      const enc = encoding_for_model(model);
-      setCount(enc.encode(text).length);
-    } catch (err) {
-      console.error("Token encoder error:", err);
+    if (!text) {
       setCount(0);
+      return;
     }
+    let canceled = false;
+    axios
+      .post("/api/tokens", { text, model })
+      .then((res) => {
+        if (!canceled) setCount(res.data.tokens || 0);
+      })
+      .catch(() => {
+        if (!canceled) setCount(0);
+      });
+    return () => {
+      canceled = true;
+    };
   }, [text, model]);
 
   return count;

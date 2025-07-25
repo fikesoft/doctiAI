@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { TiktokenModel } from "@dqbd/tiktoken";
-import { useTokenCount } from "@/app/(hooks)/useTokenCounter";
+
+import { type TiktokenModel } from "tiktoken";
+import { useTokenCounter } from "@/app/(hooks)/useTokenCounter";
 
 const models = [
   { label: "GPT‑4 & GPT‑4o Mini", value: "gpt-4" },
@@ -12,7 +13,7 @@ const models = [
 export default function TokenExmaple() {
   const [text, setText] = useState("");
   const [model, setModel] = useState<TiktokenModel>("gpt-3.5-turbo");
-  const tokens = useTokenCount(text, model);
+  const tokens = useTokenCounter(text, model);
   const chars = text.length;
 
   return (
