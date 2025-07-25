@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import QRCode from "react-qr-code";
 import { SiSolana } from "react-icons/si";
+export const dynamic = "force-dynamic";
 
 const CryptoPage = () => {
   const searchParams = useSearchParams();
