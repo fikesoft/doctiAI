@@ -5,6 +5,8 @@ import Header from "./(components)/Header/Header";
 import { Providers } from "./(providers)/Providers";
 import ContentContainer from "./(components)/ContentContainer/ContentContainer";
 import Toast from "./(components)/Toast/Toast";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -34,6 +36,7 @@ export default function RootLayout({
           <Header />
           <ContentContainer>
             <main>{children}</main>
+            <SpeedInsights />
             <Toast />
           </ContentContainer>
         </Providers>
