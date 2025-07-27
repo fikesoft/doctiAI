@@ -1,13 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { VscAccount } from "react-icons/vsc";
-
 import { HiOutlineReceiptTax, HiOutlineCurrencyDollar } from "react-icons/hi";
 
 export function AccountNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const items: {
+    label: string;
+    path: string;
+    Icon: React.ComponentType<{ size?: number }>;
+  }[] = [
+    { label: "Information", path: "/account/information", Icon: VscAccount },
+    {
+      label: "Billing",
+      path: "/account/billing-history",
+      Icon: HiOutlineReceiptTax,
+    },
+    {
+      label: "Deposit",
+      path: "/account/deposit",
+      Icon: HiOutlineCurrencyDollar,
+    },
+  ];
 
   return (
     <div
@@ -25,52 +42,28 @@ export function AccountNav() {
         gap-6 md:gap-y-6
       "
     >
-      {/* Information */}
-      <Link
-        href="/account/information"
-        className="relative flex flex-col items-center group px-2 py-1 w-full h-6"
-      >
-        <VscAccount size={24} />
-        <span className="dock-label">Information</span>
-        {pathname === "/account/information" && (
-          <>
-            {/* Mobile: bottom bar */}
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 block md:hidden w-8 h-1 rounded-full bg-primary transition-all" />
-            {/* Desktop: right vertical bar */}
-            <span className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-full bg-primary transition-all" />
-          </>
-        )}
-      </Link>
+      {items.map(({ label, path, Icon }) => {
+        const isActive = pathname === path;
+        return (
+          <button
+            key={path}
+            onClick={() => router.push(path)}
+            className="relative flex flex-col items-center group px-2 py-1"
+          >
+            <Icon size={24} />
+            <span className="dock-label">{label}</span>
 
-      {/* Billing */}
-      <Link
-        href="/account/billing-history"
-        className="relative flex flex-col items-center group px-2 py-1 w-full h-6"
-      >
-        <HiOutlineReceiptTax size={24} />
-        <span className="dock-label">Billing</span>
-        {pathname === "/account/billing-history" && (
-          <>
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 block md:hidden w-8 h-1 rounded-full bg-primary transition-all" />
-            <span className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-full bg-primary transition-all" />
-          </>
-        )}
-      </Link>
-
-      {/* Deposit */}
-      <Link
-        href="/account/deposit"
-        className="relative flex flex-col items-center group px-2 py-1 w-full h-6"
-      >
-        <HiOutlineCurrencyDollar size={24} />
-        <span className="dock-label">Deposit</span>
-        {pathname === "/account/deposit" && (
-          <>
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 block md:hidden w-8 h-1 rounded-full bg-primary transition-all" />
-            <span className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-full bg-primary transition-all" />
-          </>
-        )}
-      </Link>
+            {isActive && (
+              <>
+                {/* Mobile: bottom bar */}
+                <span className="absolute left-1/2 -translate-x-1/2 bottom-0 block md:hidden w-8 h-1 rounded-full bg-primary transition-all" />
+                {/* Desktop: right vertical bar */}
+                <span className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-full bg-primary transition-all" />
+              </>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
