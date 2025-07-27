@@ -28,7 +28,7 @@ export function AccountNav() {
       {/* Information */}
       <Link
         href="/account/information"
-        className="relative flex flex-col items-center group px-2 py-1 w-full"
+        className="relative flex flex-col items-center group px-2 py-1 w-full h-6"
       >
         <VscAccount size={24} />
         <span className="dock-label">Information</span>
@@ -45,7 +45,7 @@ export function AccountNav() {
       {/* Billing */}
       <Link
         href="/account/billing-history"
-        className="relative flex flex-col items-center group px-2 py-1 w-full"
+        className="relative flex flex-col items-center group px-2 py-1 w-full h-6"
       >
         <HiOutlineReceiptTax size={24} />
         <span className="dock-label">Billing</span>
@@ -60,7 +60,7 @@ export function AccountNav() {
       {/* Deposit */}
       <Link
         href="/account/deposit"
-        className="relative flex flex-col items-center group px-2 py-1 w-full"
+        className="relative flex flex-col items-center group px-2 py-1 w-full h-6"
       >
         <HiOutlineCurrencyDollar size={24} />
         <span className="dock-label">Deposit</span>
