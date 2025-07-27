@@ -12,17 +12,17 @@ import {
 const navItems = [
   {
     href: "/account/information",
-    icon: <HiOutlineUser />,
+    icon: <HiOutlineUser className="w-6 h-6" />,
     label: "Information",
   },
   {
     href: "/account/billing-history",
-    icon: <HiOutlineReceiptTax />,
+    icon: <HiOutlineReceiptTax className="w-6 h-6" />,
     label: "Billing",
   },
   {
     href: "/account/deposit",
-    icon: <HiOutlineCurrencyDollar />,
+    icon: <HiOutlineCurrencyDollar className="w-6 h-6" />,
     label: "Deposit",
   },
 ];
