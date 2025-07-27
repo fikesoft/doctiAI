@@ -12,17 +12,17 @@ import {
 const navItems = [
   {
     href: "/account/information",
-    icon: HiOutlineUser,
+    icon: <HiOutlineUser />,
     label: "Information",
   },
   {
     href: "/account/billing-history",
-    icon: HiOutlineReceiptTax,
+    icon: <HiOutlineReceiptTax />,
     label: "Billing",
   },
   {
     href: "/account/deposit",
-    icon: HiOutlineCurrencyDollar,
+    icon: <HiOutlineCurrencyDollar />,
     label: "Deposit",
   },
 ];
@@ -46,7 +46,7 @@ export function AccountNav() {
         gap-6 md:gap-y-6
       "
     >
-      {navItems.map(({ href, icon: Icon, label }) => {
+      {navItems.map(({ href, icon, label }) => {
         const isActive = pathname === href;
         return (
           <Link
@@ -54,7 +54,7 @@ export function AccountNav() {
             href={href}
             className="relative flex flex-col items-center group px-2 py-1 w-full"
           >
-            <Icon className="h-6 w-6 mb-1" />
+            {icon}
             <span className="dock-label">{label}</span>
             {/* HIGHLIGHT BAR */}
             {isActive && (
