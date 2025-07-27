@@ -4,11 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { VscAccount } from "react-icons/vsc";
 
-import {
-  HiOutlineUser,
-  HiOutlineReceiptTax,
-  HiOutlineCurrencyDollar,
-} from "react-icons/hi";
+import { HiOutlineReceiptTax, HiOutlineCurrencyDollar } from "react-icons/hi";
 
 export function AccountNav() {
   const pathname = usePathname();
