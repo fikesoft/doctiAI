@@ -8,23 +8,14 @@ import {
   HiOutlineCurrencyDollar,
 } from "react-icons/hi";
 
-// Nav items config
 const navItems = [
-  {
-    href: "/account/information",
-    icon: <HiOutlineUser className="w-6 h-6" />,
-    label: "Information",
-  },
+  { href: "/account/information", icon: HiOutlineUser, label: "Information" },
   {
     href: "/account/billing-history",
-    icon: <HiOutlineReceiptTax className="w-6 h-6" />,
+    icon: HiOutlineReceiptTax,
     label: "Billing",
   },
-  {
-    href: "/account/deposit",
-    icon: <HiOutlineCurrencyDollar className="w-6 h-6" />,
-    label: "Deposit",
-  },
+  { href: "/account/deposit", icon: HiOutlineCurrencyDollar, label: "Deposit" },
 ];
 
 export function AccountNav() {
@@ -46,7 +37,7 @@ export function AccountNav() {
         gap-6 md:gap-y-6
       "
     >
-      {navItems.map(({ href, icon, label }) => {
+      {navItems.map(({ href, icon: Icon, label }) => {
         const isActive = pathname === href;
         return (
           <Link
@@ -54,7 +45,7 @@ export function AccountNav() {
             href={href}
             className="relative flex flex-col items-center group px-2 py-1 w-full"
           >
-            {icon}
+            <Icon size={24} /> {/* avoid Tailwind purge issues */}
             <span className="dock-label">{label}</span>
             {/* HIGHLIGHT BAR */}
             {isActive && (
