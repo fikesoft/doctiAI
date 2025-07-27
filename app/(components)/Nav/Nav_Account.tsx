@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { VscAccount } from "react-icons/vsc";
+
 import {
   HiOutlineUser,
   HiOutlineReceiptTax,
@@ -32,7 +34,7 @@ export function AccountNav() {
         href="/account/information"
         className="relative flex flex-col items-center group px-2 py-1 w-full"
       >
-        <HiOutlineUser size={24} />
+        <VscAccount size={24} />
         <span className="dock-label">Information</span>
         {pathname === "/account/information" && (
           <>
