@@ -9,7 +9,9 @@ export default function Home() {
       {/*Hero section */}
       <div className="flex xl:flex-row flex-col justify-between gap-6">
         <div className="xl:max-w-2/6  xl:text-start text-center ">
-          <h1 className="text-h1">AI Documentaion(Fast, Easy & Free start)</h1>
+          <h1 className="text-h1 break-words">
+            AI Documentaion (Fast, Easy & Free start)
+          </h1>
           <p className="text-p ">
             Land your next role with DocAI, the AI-powered documentation
             assistant that turns your GitHub repos into polished,

@@ -20,7 +20,7 @@ const PricingCard = () => {
           </div>
 
           {/* Features list */}
-          <ul className="mt-6 flex flex-col gap-3 text-p-sm">
+          <ul className="mt-6 flex flex-col gap-3 text-p-sm text-start">
             <li className="flex items-center">
               <AiOutlineCheck className="me-2 text-success" size={20} />
               Real-time code analysis

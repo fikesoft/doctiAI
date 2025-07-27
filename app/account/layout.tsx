@@ -8,10 +8,8 @@ const LayoutAccount = ({ children }: { children: ReactNode }) => {
   return (
     <RequireAuth>
       <section>
-        <div className="flex gap-6 items-center">
-          <AccountNav />
-          {children}
-        </div>
+        <AccountNav />
+        <div className="p-4 md:pl-20 pb-20 md:pb-0 ">{children}</div>{" "}
       </section>
     </RequireAuth>
   );

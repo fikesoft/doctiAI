@@ -8,13 +8,12 @@ const BtnGitSignIn: React.FC = () => {
   const { data, status } = useSession(); // "loading" | "authenticated" | "unauthenticated"
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const handleSignIn = async () => {
     setError(null);
     setIsLoading(true);
 
     const result = await signIn("github", {
-      redirect: false, // stay on page to catch errors
+      redirect: false,
       callbackUrl: "/chat",
       scope: "read:user repo",
     });
@@ -34,7 +33,7 @@ const BtnGitSignIn: React.FC = () => {
     return <p>Checking authentication…</p>;
   }
 
-  // If already signed in, you could render something else (or nothing)
+  // If already signed in
   if (status === "authenticated") {
     return (
       <div className="dropdown dropdown-end">

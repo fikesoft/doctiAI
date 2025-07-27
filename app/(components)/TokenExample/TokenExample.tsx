@@ -17,7 +17,7 @@ export default function TokenExmaple() {
   const chars = text.length;
 
   return (
-    <div className="card mx-auto max-w-xl shadow-lg bg-base-100">
+    <div className="card max-w-xl shadow-lg bg-base-100">
       <div className="card-body space-y-6">
         {/* Intro paragraphs */}
         <p className="text-p">
