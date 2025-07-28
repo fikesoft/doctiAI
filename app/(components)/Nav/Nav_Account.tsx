@@ -36,10 +36,11 @@ export function AccountNav() {
         md:rounded-2xl
         md:ml-4
         bottom-0 left-0
-        w-full h-fit
+        w-full
         flex md:flex-col flex-row
         items-center justify-center
         gap-6 md:gap-y-6
+        h-14
       "
     >
       {items.map(({ label, path, Icon }) => {
