@@ -1,8 +1,11 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { VscAccount } from "react-icons/vsc";
-import { HiOutlineReceiptTax, HiOutlineCurrencyDollar } from "react-icons/hi";
+import {
+  HiOutlineUser,
+  HiOutlineReceiptTax,
+  HiOutlineCurrencyDollar,
+} from "react-icons/hi";
 
 export function AccountNav() {
   const pathname = usePathname();
@@ -13,7 +16,7 @@ export function AccountNav() {
     path: string;
     Icon: React.ComponentType<{ size?: number }>;
   }[] = [
-    { label: "Information", path: "/account/information", Icon: VscAccount },
+    { label: "Information", path: "/account/information", Icon: HiOutlineUser },
     {
       label: "Billing",
       path: "/account/billing-history",
@@ -40,6 +43,7 @@ export function AccountNav() {
         flex md:flex-col flex-row
         items-center justify-center
         gap-6 md:gap-y-6
+        lg:h-fit
         h-14
       "
     >

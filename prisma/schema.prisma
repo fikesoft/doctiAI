@@ -53,27 +53,30 @@ model Wallet {
 }
 
 model CryptoTransaction {
-  id           Int       @id @default(autoincrement())
-  userId       Int // Redundant, but great for querying!
-  walletId     Int
-  currency     String // e.g. "SOL", "USDC"
-  cryptoAmount Decimal // on-chain amount (in SOL or token units)
-  fiatAmount   Decimal // fiat equivalent at deposit time
-  exchangeRate Decimal // fiat per 1 unit of crypto when deposited
-  txSignature  String? // on-chain transaction signature; NULL while pending
-  memo         String? // (optional) your UUID/routing tag/memo
-  status       String    @default("pending") // "pending" | "confirmed" | "failed"
-  createdAt    DateTime  @default(now())
-  confirmedAt  DateTime?
+  id             Int       @id @default(autoincrement())
+  userId         Int // Redundant, but great for querying!
+  walletId       Int
+  currency       String // e.g. "SOL", "USDC"
+  cryptoAmount   Decimal // on-chain amount (in SOL or token units)
+  fiatAmount     Decimal // fiat equivalent at deposit time
+  exchangeRate   Decimal // fiat per 1 unit of crypto when deposited
+  txSignature    String? // on-chain transaction signature; NULL while pending
+  memo           String? // (optional) your UUID/routing tag/memo
+  status         String    @default("pending") // "pending" | "confirmed" | "failed"
+  reference      String    @unique
+  createdAt      DateTime  @default(now())
+  confirmedAt    DateTime?
+  expiresAt      DateTime
+  idempotencyKey String    @db.VarChar(64)
 
   // Relations
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, idempotencyKey])
+  @@index([status, expiresAt])
   @@map("crypto_transactions")
 }
-
-// Existing NextAuth models...
 
 model Account {
   id                Int      @id @default(autoincrement())

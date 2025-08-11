@@ -1,59 +1,101 @@
-import { PublicKey } from "@solana/web3.js";
-//import { encodeURL } from "@solana/pay";
+import { Keypair } from "@solana/web3.js";
 import { NextRequest, NextResponse } from "next/server";
-import { convertUsdToSol } from "@/lib/solana/convertUsdToSol";
 import { getServerSession } from "next-auth";
-
-import BigNumber from "bignumber.js";
-import { createUserWallet } from "@/lib/solana/createUserWallet";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/nextauth";
-export async function GET(req: NextRequest) {
+import { convertUsdToSol } from "@/lib/solana/convertUsdToSol";
+import { createUserWallet } from "@/lib/solana/createUserWallet";
+import type { DepositRequestBody, ErrorResponse } from "@/types/api";
+import buildDepositResponse from "@/lib/crypto/buildDepositResponse";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(req: NextRequest) {
+  console.log("sfasfjnas");
+
   const session = await getServerSession(authOptions);
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const usdParam = req.nextUrl.searchParams.get("usd");
-  if (!usdParam) {
-    return NextResponse.json({ error: "Missing usd param" });
-  }
-
-  const usdAmount = parseFloat(usdParam);
-  if (isNaN(usdAmount)) {
-    return NextResponse.json({ error: "Invalid usd param" });
+    return NextResponse.json<ErrorResponse>(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
   }
 
-  // 1. Get user id (assuming you store it on the session)
-  const userId = session.user.id;
+  const idempotencyKey = req.headers.get("Idempotency-Key");
+  if (!idempotencyKey) {
+    return NextResponse.json<ErrorResponse>(
+      { error: "Missing Idempotency-Key" },
+      { status: 400 }
+    );
+  }
 
-  // 2. Get or create user wallet address
-  const userWalletAddress = await createUserWallet(userId);
+  let usdAmount: number | null = null;
+  try {
+    const body = (await req.json()) as DepositRequestBody;
+    if (body?.usd != null) usdAmount = Number(body.usd);
+  } catch {
+    const q = req.nextUrl.searchParams.get("usd");
+    if (q != null) usdAmount = Number(q);
+  }
 
-  // 3. Prepare Solana payment
-  const convertedData = await convertUsdToSol(usdAmount);
-  const amount = new BigNumber(convertedData.solana);
-  const convertedSoalanaRate = convertedData.solanaRate;
-  const convertedCurrency = convertedData.idCurrency;
-  const recipient = new PublicKey(userWalletAddress.wallletAdress);
+  if (usdAmount === null || Number.isNaN(usdAmount) || usdAmount <= 0) {
+    return NextResponse.json<ErrorResponse>(
+      { error: "Invalid usd" },
+      { status: 400 }
+    );
+  }
 
-  const cryptoTransaction = await prisma.cryptoTransaction.create({
-    data: {
-      userId: session.user.id,
-      walletId: userWalletAddress.wallletId,
-      currency: convertedCurrency,
-      cryptoAmount: convertedData.solana,
-      fiatAmount: convertedData.usdAmount,
-      exchangeRate: convertedSoalanaRate,
-      txSignature: null,
-      memo: null,
-      status: "pending",
-    },
+  const userId = Number(session.user.id);
+
+  // --- Existing transaction check ---
+  const existing = await prisma.cryptoTransaction.findUnique({
+    where: { userId_idempotencyKey: { userId, idempotencyKey } },
   });
 
-  return NextResponse.json({
-    recipient: recipient.toString(),
-    sol: amount.toString(),
-    wallet: userWalletAddress,
-    cryptoTransactionId: cryptoTransaction.id,
-  });
+  if (existing) {
+    const wallet = await prisma.wallet.findUnique({
+      where: { id: existing.walletId },
+    });
+    if (!wallet) {
+      return NextResponse.json<ErrorResponse>(
+        { error: "Wallet not found" },
+        { status: 404 }
+      );
+    }
+    return buildDepositResponse(existing, wallet.walletAddress);
+  }
+
+  // --- Create new transaction ---
+  const userWallet = await createUserWallet(userId);
+  const quote = await convertUsdToSol(usdAmount);
+  const reference = Keypair.generate().publicKey;
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+  let tx;
+  try {
+    tx = await prisma.cryptoTransaction.create({
+      data: {
+        userId,
+        walletId: userWallet.walletId,
+        idempotencyKey,
+        currency: quote.idCurrency,
+        cryptoAmount: quote.solana,
+        fiatAmount: quote.usdAmount,
+        exchangeRate: quote.solanaRate,
+        status: "pending",
+        reference: reference.toBase58(),
+        expiresAt,
+      },
+    });
+  } catch (e) {
+    const deduped = await prisma.cryptoTransaction.findUnique({
+      where: { userId_idempotencyKey: { userId, idempotencyKey } },
+    });
+    if (deduped) {
+      return buildDepositResponse(deduped, userWallet.walletAddress);
+    }
+    throw e;
+  }
+  return buildDepositResponse(tx, userWallet.walletAddress);
 }
