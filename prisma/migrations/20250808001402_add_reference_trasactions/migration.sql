@@ -6,7 +6,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "crypto_transactions" ADD COLUMN     "reference" TEXT NOT NULL;
-
--- CreateIndex
+ALTER TABLE "crypto_transactions" ADD COLUMN "reference" TEXT;
+UPDATE "crypto_transactions" SET "reference" = gen_random_uuid()::text WHERE "reference" IS NULL;
+ALTER TABLE "crypto_transactions" ALTER COLUMN "reference" SET NOT NULL;
 CREATE UNIQUE INDEX "crypto_transactions_reference_key" ON "crypto_transactions"("reference");
