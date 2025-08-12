@@ -11,6 +11,13 @@ export interface DepositResponse {
   solanaPayUrl: string;
 }
 
+export interface TransactionSerialized {
+  cryptoAmount: string;
+  fiatAmount: string;
+  status: string;
+  id: number;
+  createdAt: Date;
+}
 export interface ErrorResponse {
   error: string;
 }

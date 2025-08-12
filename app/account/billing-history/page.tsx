@@ -1,7 +1,12 @@
-import React from "react";
+import React, { Suspense } from "react";
+import BillingTable from "./BillingTable";
 
 const page = () => {
-  return <div>billing history</div>;
+  return (
+    <Suspense fallback="Loading your information">
+      <BillingTable />
+    </Suspense>
+  );
 };
 
 export default page;

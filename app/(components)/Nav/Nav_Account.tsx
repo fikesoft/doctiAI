@@ -43,7 +43,7 @@ export function AccountNav() {
         flex md:flex-col flex-row
         items-center justify-center
         gap-6 md:gap-y-6
-        lg:h-fit
+        md:h-fit
         h-14
       "
     >
