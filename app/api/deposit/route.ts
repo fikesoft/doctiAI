@@ -45,7 +45,6 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = Number(session.user.id);
-
   // --- Existing transaction check ---
   const existing = await prisma.cryptoTransaction.findUnique({
     where: { userId_idempotencyKey: { userId, idempotencyKey } },
@@ -69,7 +68,13 @@ export async function POST(req: NextRequest) {
   const quote = await convertUsdToSol(usdAmount);
   const reference = Keypair.generate().publicKey;
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-
+  const userExists = await prisma.user.findUnique({ where: { id: userId } });
+  if (!userExists) {
+    return NextResponse.json<ErrorResponse>(
+      { error: "User not found" },
+      { status: 404 }
+    );
+  }
   let tx;
   try {
     tx = await prisma.cryptoTransaction.create({

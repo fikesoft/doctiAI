@@ -3,6 +3,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { encodeURL } from "@solana/pay";
 import { PublicKey } from "@solana/web3.js";
 import { NextResponse } from "next/server";
+import BigNumber from "bignumber.js";
 
 export default function buildDepositResponse(
   tx: { id: number; cryptoAmount: Decimal; reference: string; expiresAt: Date },
