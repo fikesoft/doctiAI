@@ -7,9 +7,7 @@ import BigNumber from "bignumber.js";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-type RouteParams = { params: { idempotencyKey: string } };
-
-export async function GET(_req: NextRequest, { params }: RouteParams) {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json<ErrorResponse>(
@@ -17,8 +15,9 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
       { status: 401 }
     );
   }
+  const idempotencyKey = req.nextUrl.pathname.split("/").pop();
 
-  if (!params.idempotencyKey) {
+  if (!idempotencyKey) {
     return NextResponse.json<ErrorResponse>(
       { error: "Missing Idempotency-Key" },
       { status: 400 }
@@ -29,7 +28,10 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
   const tx = await prisma.cryptoTransaction.findUnique({
     where: {
-      userId_idempotencyKey: { userId, idempotencyKey: params.idempotencyKey },
+      userId_idempotencyKey: {
+        userId,
+        idempotencyKey: idempotencyKey,
+      },
     },
   });
   if (!tx) {

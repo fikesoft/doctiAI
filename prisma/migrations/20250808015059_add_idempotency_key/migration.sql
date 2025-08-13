@@ -6,7 +6,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "crypto_transactions" ADD COLUMN "idempotencyKey" VARCHAR(64);
-UPDATE "crypto_transactions" SET "idempotencyKey" = gen_random_uuid()::text WHERE "idempotencyKey" IS NULL;
-ALTER TABLE "crypto_transactions" ALTER COLUMN "idempotencyKey" SET NOT NULL;
+ALTER TABLE "crypto_transactions" ADD COLUMN     "idempotencyKey" VARCHAR(64) NOT NULL;
+
+-- CreateIndex
 CREATE UNIQUE INDEX "crypto_transactions_userId_idempotencyKey_key" ON "crypto_transactions"("userId", "idempotencyKey");
