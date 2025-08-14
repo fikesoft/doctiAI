@@ -17,6 +17,7 @@ export interface TransactionSerialized {
   status: string;
   id: number;
   createdAt: Date;
+  idempotencyKey: string;
 }
 export interface ErrorResponse {
   error: string;

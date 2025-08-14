@@ -9,6 +9,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 import Nav from "../Nav/Nav";
 import BtnGitSignIn from "../BtnGitSignIn/BtnGitSignIn";
 import ToggleTheme from "../ToggleTheme/ToggleTheme";
+import HeaderSkeleton from "./HeaderSkeleton";
 
 export default function Header() {
   const { theme } = useTheme();
@@ -16,12 +17,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
-  if (!mounted)
-    return (
-      <div className="flex justify-center items-center skeleton h-16 w-full my-4">
-        Loading...
-      </div>
-    );
+  if (!mounted) if (!mounted) return <HeaderSkeleton />;
   const logoSrc =
     theme === "caramellatte" ? "/logo-caramelette.png" : "/logo-valentine.png";
 

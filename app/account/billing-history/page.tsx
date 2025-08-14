@@ -1,12 +1,19 @@
-import React, { Suspense } from "react";
+import React from "react";
+import CustomSuspense from "@/app/(components)/CustomSuspense/CustomSuspense";
 import BillingTable from "./BillingTable";
+import { getUserTransactions } from "@/lib/server/getUserTransactions";
 
-const page = () => {
+export default async function Page() {
+  const transactions = await getUserTransactions();
+
   return (
-    <Suspense fallback="Loading your information">
-      <BillingTable />
-    </Suspense>
+    <CustomSuspense
+      loadingText="Loading table..."
+      spinnerStyle="dots"
+      size="xl"
+      colorClass="text-primary"
+    >
+      <BillingTable transactions={transactions} />
+    </CustomSuspense>
   );
-};
-
-export default page;
+}
