@@ -17,9 +17,7 @@ export default function CryptoClient({
   const [recipient, setRecipient] = useState<string | null>(null);
   const [solAmount, setSolAmount] = useState<string | null>(null);
   const [solanaPayUrl, setSolanaPayUrl] = useState<string | null>(null);
-  const [hoverAddress, setHoverAddress] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,13 +68,6 @@ export default function CryptoClient({
     fetchData();
   }, [usd, userId, idempotencyKey]);
 
-  const handleCopy = (): void => {
-    if (!recipient) return;
-    navigator.clipboard.writeText(recipient);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-2rem)]">
       <div className="card mx-auto max-w-xl shadow-lg bg-base-100">
@@ -114,26 +105,6 @@ export default function CryptoClient({
             <span className="badge badge-outline badge-lg font-bold px-3 gap-2">
               Solana <SiSolana />
             </span>
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => {
-                handleCopy();
-                setHoverAddress(false);
-              }}
-              onMouseEnter={() => setHoverAddress(true)}
-              onMouseLeave={() => setHoverAddress(false)}
-              disabled={!recipient}
-            >
-              {copied ? "Copied!" : "Copy Address"}
-            </button>
-            {hoverAddress && recipient && (
-              <span className="bg-base-300 p-1 text-sm rounded break-all max-w-xs">
-                {recipient}
-              </span>
-            )}
           </div>
         </div>
       </div>
