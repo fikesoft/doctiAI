@@ -28,7 +28,10 @@ export function makeSolanaPayUrl({
   memo,
 }: SolanaMakeUrlProps): string {
   const recipient = new PublicKey(walletAddress);
-  const amount = new BigNumber(cryptoAmount);
+  const amount = new BigNumber(cryptoAmount).decimalPlaces(
+    6,
+    BigNumber.ROUND_DOWN
+  );
   const referencePubkey = new PublicKey(reference);
 
   const url = encodeURL({
