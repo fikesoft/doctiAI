@@ -64,7 +64,7 @@ export default function BillingTableClient({
                     >
                       {status}
                     </td>
-                    <td>{cryptoAmount.slice(-6)}</td>
+                    <td>{parseFloat(cryptoAmount).toFixed(6)}</td>
                     <td>${fiatAmount}</td>
                     <td>
                       <button

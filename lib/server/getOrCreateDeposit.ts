@@ -22,7 +22,7 @@ export function makeSolanaPayUrl({
   walletAddress,
   cryptoAmount,
   reference,
-  label,
+  label = "DoctiAI",
   message,
   memo,
 }: SolanaMakeUrlProps): string {

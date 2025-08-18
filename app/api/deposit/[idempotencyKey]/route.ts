@@ -1,12 +1,10 @@
 import { authOptions } from "@/lib/nextauth";
 import { prisma } from "@/lib/prisma";
 import { DepositResponse, ErrorResponse } from "@/types/api";
-import { encodeURL } from "@solana/pay";
 import { PublicKey } from "@solana/web3.js";
-import BigNumber from "bignumber.js";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-
+import { makeSolanaPayUrl } from "@/lib/server/getOrCreateDeposit";
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -48,20 +46,19 @@ export async function GET(req: NextRequest) {
   const wallet = process.env.STATIC_WALLET_ADDRESS!;
 
   const recipient = new PublicKey(wallet);
-  const url = encodeURL({
-    recipient,
-    amount: new BigNumber(tx.cryptoAmount.toString()),
-    reference: new PublicKey(tx.reference),
-    label: "DoctiAI Deposit",
-    message: `Deposit #${tx.id}`,
+  const url = makeSolanaPayUrl({
+    walletAddress: wallet,
+    cryptoAmount: tx.cryptoAmount.toString(),
+    reference: tx.reference,
+    message: `Deposit for $${tx.fiatAmount.toFixed(2)}`,
   });
 
   return NextResponse.json<DepositResponse>({
     cryptoTransactionId: tx.id,
     recipient: recipient.toBase58(),
-    sol: tx.cryptoAmount.toString(),
+    sol: tx.cryptoAmount.toFixed(6).toString(),
     reference: tx.reference,
     expiresAt: tx.expiresAt.toISOString(),
-    solanaPayUrl: url.toString(),
+    solanaPayUrl: url,
   });
 }
