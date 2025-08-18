@@ -1,11 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { convertUsdToSol } from "@/lib/solana/convertUsdToSol";
-import { createUserWallet } from "@/lib/solana/createUserWallet";
 import { encodeURL } from "@solana/pay";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 export type DepositData = {
-  recipient: string;
+  recipient: string | undefined;
   sol: string;
   solanaPayUrl: string;
 };
@@ -61,17 +60,12 @@ export async function getOrCreateDeposit(
     },
   });
 
-  if (existingByIdempotency) {
-    const wallet = await prisma.wallet.findUnique({
-      where: { id: existingByIdempotency.walletId },
-    });
-    if (!wallet) throw new Error("Wallet not found");
-
+  if (existingByIdempotency?.walletAddress) {
     return {
-      recipient: wallet.walletAddress,
+      recipient: existingByIdempotency.walletAddress,
       sol: existingByIdempotency.cryptoAmount.toFixed(6),
       solanaPayUrl: makeSolanaPayUrl({
-        walletAddress: wallet.walletAddress,
+        walletAddress: existingByIdempotency.walletAddress,
         cryptoAmount: existingByIdempotency.cryptoAmount.toString(),
         reference: existingByIdempotency.reference,
         label: "Your App Name",
@@ -91,17 +85,12 @@ export async function getOrCreateDeposit(
     orderBy: { createdAt: "desc" },
   });
 
-  if (existingByAmount) {
-    const wallet = await prisma.wallet.findUnique({
-      where: { id: existingByAmount.walletId },
-    });
-    if (!wallet) throw new Error("Wallet not found");
-
+  if (existingByAmount?.walletAddress && existingByAmount) {
     return {
-      recipient: wallet.walletAddress,
+      recipient: existingByAmount.walletAddress,
       sol: existingByAmount.cryptoAmount.toFixed(6),
       solanaPayUrl: makeSolanaPayUrl({
-        walletAddress: wallet.walletAddress,
+        walletAddress: existingByAmount.walletAddress,
         cryptoAmount: existingByAmount.cryptoAmount.toString(),
         reference: existingByAmount.reference,
         label: "Your App Name",
@@ -111,19 +100,20 @@ export async function getOrCreateDeposit(
   }
 
   // 3. creare tranzacție nouă
-  const userWallet = await createUserWallet(userId);
+  const userWallet = process.env.STATIC_WALLET_ADDRESS!;
+  if (!userWallet) throw new Error("STATIC_WALLET_ADDRESS not set");
+
   const quote = await convertUsdToSol(usd);
   const reference = Keypair.generate().publicKey;
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
   const userExists = await prisma.user.findUnique({ where: { id: userId } });
   if (!userExists) throw new Error("User not found");
-
   try {
     const tx = await prisma.cryptoTransaction.create({
       data: {
         userId,
-        walletId: userWallet.walletId,
+        walletAddress: process.env.STATIC_WALLET_ADDRESS!,
         idempotencyKey,
         currency: quote.idCurrency,
         cryptoAmount: quote.solana,
@@ -136,10 +126,10 @@ export async function getOrCreateDeposit(
     });
 
     return {
-      recipient: userWallet.walletAddress,
+      recipient: userWallet,
       sol: tx.cryptoAmount.toFixed(6),
       solanaPayUrl: makeSolanaPayUrl({
-        walletAddress: userWallet.walletAddress,
+        walletAddress: userWallet,
         cryptoAmount: tx.cryptoAmount.toString(),
         reference: tx.reference,
         label: "Your App Name",
@@ -158,10 +148,10 @@ export async function getOrCreateDeposit(
 
     if (deduped) {
       return {
-        recipient: userWallet.walletAddress,
+        recipient: userWallet,
         sol: deduped.cryptoAmount.toFixed(6),
         solanaPayUrl: makeSolanaPayUrl({
-          walletAddress: userWallet.walletAddress,
+          walletAddress: userWallet,
           cryptoAmount: deduped.cryptoAmount.toString(),
           reference: deduped.reference,
           label: "Your App Name",

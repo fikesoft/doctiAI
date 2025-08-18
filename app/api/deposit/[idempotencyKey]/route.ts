@@ -45,15 +45,9 @@ export async function GET(req: NextRequest) {
     return new NextResponse(null, { status: 204 });
   }
 
-  const wallet = await prisma.wallet.findUnique({ where: { id: tx.walletId } });
-  if (!wallet) {
-    return NextResponse.json<ErrorResponse>(
-      { error: "Wallet not found" },
-      { status: 404 }
-    );
-  }
+  const wallet = process.env.STATIC_WALLET_ADDRESS!;
 
-  const recipient = new PublicKey(wallet.walletAddress);
+  const recipient = new PublicKey(wallet);
   const url = encodeURL({
     recipient,
     amount: new BigNumber(tx.cryptoAmount.toString()),
