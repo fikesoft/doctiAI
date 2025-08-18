@@ -13,6 +13,5 @@ export async function createUserWallet(userId: number) {
   const wallet = await prisma.wallet.create({
     data: { userId, walletAddress, secretPhrase },
   });
-
   return { walletId: wallet.id, walletAddress: wallet.walletAddress };
 }

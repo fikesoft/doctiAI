@@ -29,33 +29,16 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  // Wallet (1:1 relation)
-  wallet Wallet?
-
   // On-chain deposit history (all their transactions, for convenience)
   cryptoTransactions CryptoTransaction[]
 
   @@map("users")
 }
 
-model Wallet {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int  @unique // Ensures 1:1 relation with User
-
-  secretPhrase  String // ENCRYPTED, base64-encoded!
-  walletAddress String @unique
-
-  // All transactions for this wallet
-  cryptoTransactions CryptoTransaction[]
-
-  @@map("wallets")
-}
-
 model CryptoTransaction {
   id             Int       @id @default(autoincrement())
   userId         Int // Redundant, but great for querying!
-  walletId       Int
+  walletAddress  String?
   currency       String // e.g. "SOL", "USDC"
   cryptoAmount   Decimal // on-chain amount (in SOL or token units)
   fiatAmount     Decimal // fiat equivalent at deposit time
@@ -70,8 +53,7 @@ model CryptoTransaction {
   idempotencyKey String    @db.VarChar(64)
 
   // Relations
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, idempotencyKey])
   @@index([status, expiresAt])
