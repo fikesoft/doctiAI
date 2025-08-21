@@ -26,7 +26,7 @@ const Toast = () => {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`alert alert-${toast.headerToast} flex flex-col gap-3 items-start transition-opacity duration-300 opacity-100`}
+          className={`alert alert-${toast.headerToast} flex flex-col gap-3 items-start transition-opacity duration-300 opacity-100 bg-warning`}
         >
           <div className="flex justify-between items-center w-full">
             <span>{toast.headerToast?.toLocaleUpperCase()}</span>

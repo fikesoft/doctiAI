@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
 import { NextRequest, NextResponse } from "next/server";
-import { getOrCreateDeposit } from "@/lib/server/getOrCreateDeposit";
+import { getOrCreateDeposit } from "@/lib/deposit/getOrCreateDeposit";
 import type { DepositRequestBody, ErrorResponse } from "@/types/api";
 
 export const runtime = "nodejs";

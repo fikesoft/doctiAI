@@ -4,7 +4,11 @@ import { DepositResponse, ErrorResponse } from "@/types/api";
 import { PublicKey } from "@solana/web3.js";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { makeSolanaPayUrl } from "@/lib/server/getOrCreateDeposit";
+import { makeSolanaPayUrl } from "@/lib/deposit/getOrCreateDeposit";
+const wallet =
+  process.env.APP_STATE === "development"
+    ? process.env.STATIC_WALLET_ADDRESS_DEV!
+    : process.env.STATIC_WALLET_ADDRESS_PROD!;
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -42,8 +46,6 @@ export async function GET(req: NextRequest) {
   if (tx.status === "confirmed" || tx.status === "failed") {
     return new NextResponse(null, { status: 204 });
   }
-
-  const wallet = process.env.STATIC_WALLET_ADDRESS!;
 
   const recipient = new PublicKey(wallet);
   const url = makeSolanaPayUrl({

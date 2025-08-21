@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { SiSolana } from "react-icons/si";
 import axios, { AxiosError } from "axios";
+import { useSession } from "next-auth/react";
+import useAppDispatch from "@/store/hooks/useDispatch";
+import { pushToast } from "@/store/slices/toast";
 
 export default function CryptoClient({
   usd,
@@ -18,6 +21,9 @@ export default function CryptoClient({
   const [solAmount, setSolAmount] = useState<string | null>(null);
   const [solanaPayUrl, setSolanaPayUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false); // loading state for button
+  const session = useSession();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,13 +31,11 @@ export default function CryptoClient({
         setLoading(true);
 
         if (idempotencyKey) {
-          // Fetch existing transaction details
           const res = await axios.get(`/api/deposit/${idempotencyKey}`);
           setRecipient(res.data.recipient);
           setSolAmount(res.data.sol);
           setSolanaPayUrl(res.data.solanaPayUrl);
         } else {
-          // Create new deposit with idempotency key
           const storageKey = `deposit_idempotency_${userId}_${usd}`;
           let idempotencyKey = localStorage.getItem(storageKey);
           if (!idempotencyKey) {
@@ -56,7 +60,16 @@ export default function CryptoClient({
         }
       } catch (error) {
         const err = error as AxiosError<{ error: string }>;
-        console.error(err.response?.data?.error ?? "Unknown error");
+        const message = err.response?.data?.error ?? "Unknown error";
+
+        console.error(message);
+        dispatch(
+          pushToast({
+            messageToast: message,
+            headerToast: "error",
+          })
+        );
+
         setRecipient(null);
         setSolAmount(null);
         setSolanaPayUrl(null);
@@ -66,7 +79,45 @@ export default function CryptoClient({
     };
 
     fetchData();
-  }, [usd, userId, idempotencyKey]);
+  }, [usd, userId, idempotencyKey, dispatch]);
+
+  const handleTestTransaction = async () => {
+    if (!solanaPayUrl) return;
+
+    try {
+      setSending(true);
+
+      const urlObj = new URL(solanaPayUrl);
+      const amountStr = urlObj.searchParams.get("amount");
+      const referenceStr = urlObj.searchParams.get("reference");
+      const amount = amountStr ? Number(amountStr) : 0;
+      const reference = referenceStr ?? undefined;
+
+      const res = await axios.post("/api/transaction", {
+        amountSol: amount,
+        reference: reference,
+      });
+
+      dispatch(
+        pushToast({
+          messageToast: "Transaction sent successfully",
+          headerToast: "success",
+        })
+      );
+
+      console.log("Transaction result:", res.data);
+    } catch (err) {
+      console.error("Transaction error:", err);
+      dispatch(
+        pushToast({
+          messageToast: "Failed to send transaction",
+          headerToast: "error",
+        })
+      );
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-2rem)]">
@@ -106,6 +157,22 @@ export default function CryptoClient({
               Solana <SiSolana />
             </span>
           </div>
+
+          {session.data?.user.role === "admin" && (
+            <div className="flex justify-center">
+              <button
+                className="btn btn-accent"
+                onClick={handleTestTransaction}
+                disabled={sending}
+              >
+                {sending ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Send transaction"
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
