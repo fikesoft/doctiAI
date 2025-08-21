@@ -45,6 +45,11 @@ export function makeSolanaPayUrl({
   return url.toString();
 }
 
+const wallet =
+  process.env.APP_STATE === "development"
+    ? process.env.STATIC_WALLET_ADDRESS_DEV
+    : process.env.STATIC_WALLET_ADDRESS_PROD;
+
 export async function getOrCreateDeposit(
   usd: number,
   idempotencyKey: string,
@@ -100,8 +105,8 @@ export async function getOrCreateDeposit(
   }
 
   // 3. creare tranzacție nouă
-  const userWallet = process.env.STATIC_WALLET_ADDRESS!;
-  if (!userWallet) throw new Error("STATIC_WALLET_ADDRESS not set");
+  const userWallet = wallet;
+  if (!userWallet) throw new Error("Wallet is not set");
 
   const quote = await convertUsdToSol(usd);
   const reference = Keypair.generate().publicKey;
@@ -113,7 +118,7 @@ export async function getOrCreateDeposit(
     const tx = await prisma.cryptoTransaction.create({
       data: {
         userId,
-        walletAddress: process.env.STATIC_WALLET_ADDRESS!,
+        walletAddress: wallet,
         idempotencyKey,
         currency: quote.idCurrency,
         cryptoAmount: quote.solana,
