@@ -7,6 +7,7 @@ import axios, { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import useAppDispatch from "@/store/hooks/useDispatch";
 import { pushToast } from "@/store/slices/toast";
+import { useRouter } from "next/navigation";
 
 export default function CryptoClient({
   usd,
@@ -24,6 +25,7 @@ export default function CryptoClient({
   const [sending, setSending] = useState(false); // loading state for button
   const session = useSession();
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +83,41 @@ export default function CryptoClient({
     fetchData();
   }, [usd, userId, idempotencyKey, dispatch]);
 
+  useEffect(() => {
+    if (!solanaPayUrl) return;
+
+    const urlObj = new URL(solanaPayUrl);
+    const referenceStr = urlObj.searchParams.get("reference");
+    if (!referenceStr) return;
+
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set("reference", referenceStr);
+
+    router.replace(`${window.location.pathname}?${currentParams.toString()}`);
+  }, [solanaPayUrl, router]);
+
+  const handleCheckTransaction = async () => {
+    try {
+      // use current query params, fallback to solanaPayUrl and prop usd
+      const params = new URLSearchParams(window.location.search);
+
+      if (!params.get("reference") && solanaPayUrl) {
+        const ref = new URL(solanaPayUrl).searchParams.get("reference");
+        if (ref) params.set("reference", ref);
+      }
+
+      if (!params.get("usd")) {
+        params.set("usd", String(usd)); // usd is the component prop
+      }
+
+      const res = await axios.get(
+        `/api/transaction/check?${params.toString()}`
+      );
+      console.log("Transaction check result:", res.data);
+    } catch (err) {
+      console.error("Transaction check failed:", err);
+    }
+  };
   const handleTestTransaction = async () => {
     if (!solanaPayUrl) return;
 
@@ -173,6 +210,11 @@ export default function CryptoClient({
               </button>
             </div>
           )}
+          <div className="flex justify-center">
+            <button className="btn btn-accent" onClick={handleCheckTransaction}>
+              Check
+            </button>
+          </div>
         </div>
       </div>
     </div>
