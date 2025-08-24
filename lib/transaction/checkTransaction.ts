@@ -191,7 +191,14 @@ export async function checkTransaction(
       expectedSol
     );
 
-    if (solReceived < expectedSol) {
+    const expectedLamports = Math.floor(expectedSol * 1_000_000_000);
+    const TOLERANCE = 10_000; // ~0.00001 SOL
+
+    if (lamportsReceived >= expectedLamports) {
+      // user sent enough or more
+    } else if (expectedLamports - lamportsReceived <= TOLERANCE) {
+      // user sent slightly less, but within tolerance
+    } else {
       return respondPendingOrFailed("amount_mismatch", matchedSignature);
     }
 
