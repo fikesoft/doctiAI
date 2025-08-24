@@ -59,7 +59,11 @@ export default function BillingTableClient({
                       className={
                         status === "pending"
                           ? "text-yellow-500"
-                          : "text-green-500"
+                          : status === "failed"
+                          ? "text-red-500"
+                          : status === "confirmed"
+                          ? "text-green-500"
+                          : "text-gray-500"
                       }
                     >
                       {status}

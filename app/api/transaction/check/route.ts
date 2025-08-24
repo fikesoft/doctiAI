@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     // Call the checkTransaction helper
     const result = await checkTransaction(
       new PublicKey(reference),
-      Number(expectedSol)
+      Number((await expectedSol).solana)
     );
 
     if (result.status === "confirmed") {
