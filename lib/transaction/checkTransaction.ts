@@ -5,21 +5,19 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import { prisma } from "../prisma";
-
-const connection = new Connection(process.env.QUICKNODE_DEV!, "confirmed");
-
+import { TransactionCheckedReturn } from "@/types/api";
+const IS_DEV = process.env.APP_STATE !== "production";
+const QUICKNODE =
+  process.env.APP_STATE === "production"
+    ? process.env.QUICKNODE_PROD!
+    : process.env.QUICKNODE_DEV!;
+const connection = new Connection(QUICKNODE, "confirmed");
 const SCAN_LIMIT = 500;
 
 export async function checkTransaction(
   reference: PublicKey,
   expectedSol: number
-): Promise<{
-  valid: boolean;
-  reason?: string;
-  signature?: string;
-  status: "confirmed" | "pending" | "failed";
-  timeLeftMs?: number;
-}> {
+): Promise<TransactionCheckedReturn> {
   const refStr = reference.toString();
   console.log(">>> Checking transaction for reference:", refStr);
 
@@ -79,60 +77,76 @@ export async function checkTransaction(
 
     if (!signatures.length) return respondPendingOrFailed("onchain_not_found");
 
-    // 1) Try to find a signature entry that already has memo text
-    const matchedSignatureEntry = signatures.find((s) => {
-      if (!s.memo) return false;
-      // some RPCs return memo with length prefix "[44] ..." so just check contains
-      return s.memo.includes(refStr) || s.memo === refStr;
-    });
+    let matchedSignature: string | undefined;
 
-    let matchedSignature: string | undefined = matchedSignatureEntry?.signature;
-
-    // 2) If not found, fallback to fetching parsedTxs and inspect the memo instruction
-    if (!matchedSignature) {
-      console.log(
-        "No memo in signature list. Falling back to parsing transactions to find memo."
+    if (IS_DEV) {
+      // --- DEV mode: look for memo ---
+      console.log("DEV mode: searching for memo");
+      const matchedSignatureEntry = signatures.find(
+        (s) => s.memo && (s.memo.includes(refStr) || s.memo === refStr)
       );
-      for (const sigEntry of signatures) {
-        const sig = sigEntry.signature;
-        try {
-          const parsedTx = await connection.getParsedTransaction(sig, {
-            commitment: "confirmed",
-          });
+      matchedSignature = matchedSignatureEntry?.signature;
 
-          if (!parsedTx) continue;
+      if (!matchedSignature) {
+        for (const sigEntry of signatures) {
+          const sig = sigEntry.signature;
+          try {
+            const parsedTx = await connection.getParsedTransaction(sig, {
+              commitment: "confirmed",
+            });
+            if (!parsedTx) continue;
 
-          const instrs = parsedTx.transaction.message.instructions as (
-            | ParsedInstruction
-            | PartiallyDecodedInstruction
-          )[];
-          for (const instr of instrs) {
-            if ("program" in instr && instr.program === "spl-memo") {
-              // ParsedInstruction always has `parsed`
-              if ("parsed" in instr) {
-                const parsed = instr.parsed;
-                if (
-                  typeof parsed === "string" &&
-                  (parsed === refStr || parsed.includes(refStr))
-                ) {
-                  matchedSignature = sig;
-                  console.log(
-                    "Found memo in parsedTx via instruction for signature:",
-                    sig
-                  );
-                  break;
+            const instrs = parsedTx.transaction.message.instructions as (
+              | ParsedInstruction
+              | PartiallyDecodedInstruction
+            )[];
+            for (const instr of instrs) {
+              if ("program" in instr && instr.program === "spl-memo") {
+                if ("parsed" in instr && typeof instr.parsed === "string") {
+                  if (
+                    instr.parsed === refStr ||
+                    instr.parsed.includes(refStr)
+                  ) {
+                    matchedSignature = sig;
+                    console.log(
+                      "Found memo in parsedTx via instruction for signature:",
+                      sig
+                    );
+                    break;
+                  }
                 }
               }
             }
+            if (matchedSignature) break;
+          } catch (e) {
+            console.warn("Error parsing tx for signature", sig, e);
           }
-          if (matchedSignature) break;
-        } catch (e) {
-          console.warn("Error parsing tx for signature", sig, e);
-          // continue searching other signatures
         }
+      } else {
+        console.log(
+          "Found memo in signature list. signature:",
+          matchedSignature
+        );
       }
     } else {
-      console.log("Found memo in signature list. signature:", matchedSignature);
+      // --- PROD mode: look for reference in account keys ---
+      console.log("PROD mode: searching in account keys");
+      for (const sigEntry of signatures) {
+        const sig = sigEntry.signature;
+        const parsedTx = await connection.getParsedTransaction(sig, {
+          commitment: "confirmed",
+        });
+        if (!parsedTx) continue;
+
+        const accKeys = parsedTx.transaction.message.accountKeys.map((k) =>
+          k.pubkey.toBase58()
+        );
+        if (accKeys.includes(refStr)) {
+          matchedSignature = sig;
+          console.log("Found reference in account keys:", sig);
+          break;
+        }
+      }
     }
 
     if (!matchedSignature) {
@@ -178,11 +192,9 @@ export async function checkTransaction(
     );
 
     if (solReceived < expectedSol) {
-      // Not enough. if still time left -> pending, otherwise failed
       return respondPendingOrFailed("amount_mismatch", matchedSignature);
     }
 
-    // Amount OK. If timeLeftMs <=0 it is still valid. Return confirmed with timeLeftMs (could be 0).
     return {
       valid: true,
       reason: "amount_ok",

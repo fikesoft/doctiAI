@@ -73,7 +73,7 @@ export async function getOrCreateDeposit(
         walletAddress: existingByIdempotency.walletAddress,
         cryptoAmount: existingByIdempotency.cryptoAmount.toString(),
         reference: existingByIdempotency.reference,
-        label: "Your App Name",
+        label: "DoctiAI",
         message: `Deposit for $${usd.toFixed(2)}`,
       }),
     };
@@ -98,7 +98,7 @@ export async function getOrCreateDeposit(
         walletAddress: existingByAmount.walletAddress,
         cryptoAmount: existingByAmount.cryptoAmount.toString(),
         reference: existingByAmount.reference,
-        label: "Your App Name",
+        label: "DoctiAI",
         message: `Deposit for $${usd.toFixed(2)}`,
       }),
     };
@@ -137,7 +137,7 @@ export async function getOrCreateDeposit(
         walletAddress: userWallet,
         cryptoAmount: tx.cryptoAmount.toString(),
         reference: tx.reference,
-        label: "Your App Name",
+        label: "DoctiAI",
         message: `Deposit for $${usd.toFixed(2)}`,
       }),
     };
@@ -159,7 +159,7 @@ export async function getOrCreateDeposit(
           walletAddress: userWallet,
           cryptoAmount: deduped.cryptoAmount.toString(),
           reference: deduped.reference,
-          label: "Your App Name",
+          label: "DoctiAI",
           message: `Deposit for $${usd.toFixed(2)}`,
         }),
       };

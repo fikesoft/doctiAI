@@ -19,6 +19,13 @@ export interface TransactionSerialized {
   createdAt: Date;
   idempotencyKey: string;
 }
+export interface TransactionCheckedReturn {
+  valid: boolean;
+  reason?: string;
+  signature?: string;
+  status: "confirmed" | "pending" | "failed";
+  timeLeftMs?: number;
+}
 export interface ErrorResponse {
   error: string;
 }

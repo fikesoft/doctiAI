@@ -1,8 +1,8 @@
 "use client";
 
 import { useTokenConverter } from "@/app/(hooks)/useTokenConverter";
+import { notifyError } from "@/lib/notify/notify";
 import useAppDispatch from "@/store/hooks/useDispatch";
-import { pushToast } from "@/store/slices/toast";
 import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 export function SolanaDeposit() {
@@ -13,12 +13,7 @@ export function SolanaDeposit() {
     e.preventDefault();
     const rawUsdFloat = parseFloat(rawUsd);
     if (!rawUsd || isNaN(rawUsdFloat) || rawUsdFloat <= 0) {
-      dispatch(
-        pushToast({
-          messageToast: "Please insert an amount greater than 0",
-          headerToast: "error",
-        })
-      );
+      notifyError(dispatch, 'Please insert an amount greater than 0"');
       return;
     }
     router.push(`/crypto?usd=${rawUsdFloat}`);
